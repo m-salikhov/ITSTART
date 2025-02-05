@@ -1,0 +1,10 @@
+main {
+  display: flex;
+  justify-content: center;
+  padding-top: 2rem;
+  .main-wrapper {
+    width: 900px;
+    display: flex;
+    flex-direction: column;
+  }
+}
