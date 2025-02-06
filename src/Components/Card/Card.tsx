@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { Dispatch, SetStateAction, useState } from 'react';
 import { Seminar } from '../../Types/Seminar';
 import Modal from '../Modal/Modal';
 import './Card.css';
@@ -7,9 +7,15 @@ import { baseURL } from '../../Constants';
 
 interface Props {
   seminar: Seminar;
-  refresh: () => void;
+  setSeminars: Dispatch<SetStateAction<Seminar[]>>;
 }
 
+//функция блокировки скролла body при открытии модальных окон
+function lockBodyScroll(lock: boolean) {
+  lock ? document.body.classList.add('modal-open') : document.body.classList.remove('modal-open');
+}
+
+//форматирование даты из дд.мм.гггг в гггг-мм-дд и обратно для корректной работы инпута
 function convertDate(date: string) {
   if (date.includes('-')) {
     return date.split('-').reverse().join('.');
@@ -18,21 +24,30 @@ function convertDate(date: string) {
   }
 }
 
-export default function Card({ seminar, refresh }: Props) {
-  const [editForm, setEditForm] = useState(seminar);
+export default function Card({ seminar, setSeminars }: Props) {
+  //состояние формы редактирования
+  const [editForm, setEditForm] = useState({ ...seminar });
+  //флаг открытия модалки удаления
   const [activeDelete, setActiveDelete] = useState(false);
+  //флаг открытия модалки редактирования
   const [activeEdit, setActiveEdit] = useState(false);
   const [isLoading, setLoading] = useState(false);
   const [isError, setIsError] = useState(false);
 
+  //обработчик сабмита удаления. С учётом состояния запроса и возможных ошибок
   async function onSubmitDelete() {
     setIsError(false);
     setLoading(true);
 
     try {
-      await axios.delete(baseURL + seminar.id);
-      refresh();
+      //отправляем запрос на удаление и достаем из ответа данные удаленного семинара
+      const { data } = await axios.delete<Seminar>(baseURL + seminar.id);
+      //обновляем список семинаров
+      setSeminars((list) => list.filter((item) => item.id !== data.id));
+      //закрываем модалку
       setActiveDelete(false);
+      //разблокируем скролл
+      lockBodyScroll(false);
     } catch (error) {
       console.log(error);
       setIsError(true);
@@ -41,14 +56,20 @@ export default function Card({ seminar, refresh }: Props) {
     setLoading(false);
   }
 
+  //обработчик сабмита редактирования. С учётом состояния запроса и возможных ошибок
   async function onSubmitEdit() {
     setIsError(false);
     setLoading(true);
 
     try {
-      await axios.put(baseURL + seminar.id, editForm);
-      refresh();
+      //отправляем запрос на редактирование и достаем из ответа данные отредактированного семинара
+      const { data } = await axios.put<Seminar>(baseURL + seminar.id, editForm);
+      //обновляем список семинаров
+      setSeminars((list) => list.map((item) => (item.id === data.id ? data : item)));
+      //закрываем модалку
       setActiveEdit(false);
+      //разблокируем скролл
+      lockBodyScroll(false);
     } catch (error) {
       console.log(error);
       setIsError(true);
@@ -61,6 +82,7 @@ export default function Card({ seminar, refresh }: Props) {
     <div className='card'>
       <div className='card-body'>
         <div className='card-img'>
+          {/* ПРИШЛОСЬ ЗАМЕНИТЬ ССЫЛКИ ИЗ-ЗА БЛОКИРОВКИ PICSUM */}
           <img src={seminar.photo} alt='' />
         </div>
         <div className='card-info'>
@@ -71,10 +93,26 @@ export default function Card({ seminar, refresh }: Props) {
       </div>
 
       <div className='card-footer'>
-        <button type='button' onClick={() => setActiveEdit(true)}>
+        <button
+          type='button'
+          onClick={() => {
+            // открываем модалку
+            setActiveEdit(true);
+            // блокируем скролл
+            lockBodyScroll(true);
+          }}
+        >
           Редактировать
         </button>
-        <button type='button' onClick={() => setActiveDelete(true)}>
+        <button
+          type='button'
+          onClick={() => {
+            // открываем модалку
+            setActiveDelete(true);
+            // блокируем скролл
+            lockBodyScroll(true);
+          }}
+        >
           Удалить
         </button>
       </div>
@@ -85,15 +123,18 @@ export default function Card({ seminar, refresh }: Props) {
         onClose={() => {
           setActiveEdit(false);
           setIsError(false);
+          lockBodyScroll(false);
         }}
         onSubmit={onSubmitEdit}
         isDisabled={isLoading}
       >
+        {/* передаём в модальное окно форму для редактирования. Связываем с состоянием формы editForm.
+         Блокируем взаимодействие с инпутами при отправке формы */}
         <div className='modal-edit'>
           <input
             type='text'
             name='title'
-            placeholder={seminar.title}
+            placeholder={editForm.title}
             onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
             value={editForm.title}
             disabled={isLoading}
@@ -101,7 +142,7 @@ export default function Card({ seminar, refresh }: Props) {
           <input
             type='date'
             name='date'
-            placeholder={seminar.date}
+            placeholder={editForm.date}
             onChange={(e) => setEditForm({ ...editForm, date: convertDate(e.target.value) })}
             value={convertDate(editForm.date)}
             disabled={isLoading}
@@ -109,13 +150,13 @@ export default function Card({ seminar, refresh }: Props) {
           <input
             type='time'
             name='time'
-            placeholder={seminar.time}
+            placeholder={editForm.time}
             onChange={(e) => setEditForm({ ...editForm, time: e.target.value })}
             value={editForm.time}
             disabled={isLoading}
           />
           <textarea
-            placeholder={seminar.description}
+            placeholder={editForm.description}
             name='description'
             onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
             value={editForm.description}
@@ -123,25 +164,31 @@ export default function Card({ seminar, refresh }: Props) {
           />
         </div>
 
+        {/* состояние загрузки внутри модалки */}
         {isLoading && <p className='modal-loading'>Загрузка...</p>}
 
+        {/* отображение ошибки внутри модалки */}
         {isError && <p className='modal-error'>Не удалось сохранить изменения</p>}
       </Modal>
 
+      {/* передаём в модальное окно форму подтверждения удаления. */}
       <Modal
         active={activeDelete}
         title={'Удалить семинар'}
         onClose={() => {
           setActiveDelete(false);
           setIsError(false);
+          lockBodyScroll(false);
         }}
         onSubmit={onSubmitDelete}
         isDisabled={isLoading}
       >
         <p>Вы действительно хотите удалить семинар "{seminar.title}"?</p>
 
+        {/* состояние загрузки внутри модалки */}
         {isLoading && <p className='modal-loading'>Загрузка...</p>}
 
+        {/* отображение ошибки внутри модалки */}
         {isError && <p className='modal-error'>Не удалось удалить семинар</p>}
       </Modal>
     </div>

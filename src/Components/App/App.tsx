@@ -9,11 +9,9 @@ function App() {
   const [seminars, setSeminars] = useState<Seminar[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
-  const [refresh, setRefresh] = useState(false);
 
+  //загружаем список семинаров с сервера, обрабатываем ошибки и состояние загрузки
   useEffect(() => {
-    setIsLoading(true);
-
     axios
       .get<Seminar[]>(baseURL)
       .then((res) => {
@@ -24,17 +22,17 @@ function App() {
         setIsError(true);
       })
       .finally(() => setIsLoading(false));
-  }, [refresh]);
+  }, []);
 
   return (
     <main>
       <div className='main-wrapper'>
         {isError && <h2 className='main-message'>Не удалось загрузить список семинаров</h2>}
-
         {isLoading && <h2 className='main-message'>Загрузка...</h2>}
 
-        {seminars.length > 0 &&
-          seminars.map((item) => <Card seminar={item} refresh={() => setRefresh((prev) => !prev)} key={item.id} />)}
+        {/* отрисовываем карточки семинаров в случае успешной загрузки. 
+        передаем функцию для обновления списка семинаров */}
+        {seminars.length > 0 && seminars.map((item) => <Card seminar={item} setSeminars={setSeminars} key={item.id} />)}
       </div>
     </main>
   );

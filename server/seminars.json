@@ -1,18 +1,10 @@
 {
   "seminars": [
     {
-      "id": "1",
-      "title": "Новинки Kosmoteros",
-      "description": "Обзор новых средств и методик от Kosmoteros",
-      "date": "12.01.2025",
-      "time": "18:00",
-      "photo": "https://placeholder.pagebee.io/api/random/750/730"
-    },
-    {
       "id": "2",
       "title": "Семинар по инновациям в косметологии",
       "description": "Разбор новейших тенденций в косметологии и трендовых продуктов",
-      "date": "07.02.2025",
+      "date": "09.02.2025",
       "time": "16:10",
       "photo": "https://placeholder.pagebee.io/api/random/750/731"
     },
@@ -29,7 +21,7 @@
       "title": "Актуальные тренды в бьюти-индустрии",
       "description": "Обсуждение современных трендов и методик в бьюти-индустрии.",
       "date": "07.02.2025",
-      "time": "13:00",
+      "time": "14:00",
       "photo": "https://placeholder.pagebee.io/api/random/750/733"
     },
     {
@@ -52,7 +44,7 @@
       "id": "7",
       "title": "Инновационные средства Kosmoteros",
       "description": "Демонстрация новых продуктов Kosmoteros и их уникальных свойств.",
-      "date": "13.02.2025",
+      "date": "23.02.2025",
       "time": "16:00",
       "photo": "https://placeholder.pagebee.io/api/random/750/736"
     },
@@ -68,7 +60,7 @@
       "id": "9",
       "title": "Мастер-класс от Kosmoteros",
       "description": "Практический мастер-класс по использованию инновационных косметических средств.",
-      "date": "17.02.2025",
+      "date": "18.02.2025",
       "time": "18:00",
       "photo": "https://placeholder.pagebee.io/api/random/750/738"
     },
