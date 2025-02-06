@@ -19,20 +19,42 @@ function convertDate(date: string) {
 }
 
 export default function Card({ seminar, refresh }: Props) {
+  const [editForm, setEditForm] = useState(seminar);
   const [activeDelete, setActiveDelete] = useState(false);
   const [activeEdit, setActiveEdit] = useState(false);
-  const [editForm, setEditForm] = useState(seminar);
+  const [isLoading, setLoading] = useState(false);
+  const [isError, setIsError] = useState(false);
 
   async function onSubmitDelete() {
-    await axios.delete(baseURL + seminar.id).catch((e) => {});
-    refresh();
-    setActiveDelete(false);
+    setIsError(false);
+    setLoading(true);
+
+    try {
+      await axios.delete(baseURL + seminar.id);
+      refresh();
+      setActiveDelete(false);
+    } catch (error) {
+      console.log(error);
+      setIsError(true);
+    }
+
+    setLoading(false);
   }
 
   async function onSubmitEdit() {
-    await axios.put(baseURL + seminar.id, editForm);
-    refresh();
-    setActiveEdit(false);
+    setIsError(false);
+    setLoading(true);
+
+    try {
+      await axios.put(baseURL + seminar.id, editForm);
+      refresh();
+      setActiveEdit(false);
+    } catch (error) {
+      console.log(error);
+      setIsError(true);
+    }
+
+    setLoading(false);
   }
 
   return (
@@ -60,8 +82,12 @@ export default function Card({ seminar, refresh }: Props) {
       <Modal
         active={activeEdit}
         title={'Редактировать семинар'}
-        onClose={() => setActiveEdit(false)}
+        onClose={() => {
+          setActiveEdit(false);
+          setIsError(false);
+        }}
         onSubmit={onSubmitEdit}
+        isDisabled={isLoading}
       >
         <div className='modal-edit'>
           <input
@@ -70,6 +96,7 @@ export default function Card({ seminar, refresh }: Props) {
             placeholder={seminar.title}
             onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
             value={editForm.title}
+            disabled={isLoading}
           />
           <input
             type='date'
@@ -77,6 +104,7 @@ export default function Card({ seminar, refresh }: Props) {
             placeholder={seminar.date}
             onChange={(e) => setEditForm({ ...editForm, date: convertDate(e.target.value) })}
             value={convertDate(editForm.date)}
+            disabled={isLoading}
           />
           <input
             type='time'
@@ -84,23 +112,37 @@ export default function Card({ seminar, refresh }: Props) {
             placeholder={seminar.time}
             onChange={(e) => setEditForm({ ...editForm, time: e.target.value })}
             value={editForm.time}
+            disabled={isLoading}
           />
           <textarea
             placeholder={seminar.description}
             name='description'
             onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
             value={editForm.description}
+            disabled={isLoading}
           />
         </div>
+
+        {isLoading && <p className='modal-loading'>Загрузка...</p>}
+
+        {isError && <p className='modal-error'>Не удалось сохранить изменения</p>}
       </Modal>
 
       <Modal
         active={activeDelete}
         title={'Удалить семинар'}
-        onClose={() => setActiveDelete(false)}
+        onClose={() => {
+          setActiveDelete(false);
+          setIsError(false);
+        }}
         onSubmit={onSubmitDelete}
+        isDisabled={isLoading}
       >
         <p>Вы действительно хотите удалить семинар "{seminar.title}"?</p>
+
+        {isLoading && <p className='modal-loading'>Загрузка...</p>}
+
+        {isError && <p className='modal-error'>Не удалось удалить семинар</p>}
       </Modal>
     </div>
   );

@@ -7,30 +7,34 @@ import { baseURL } from '../../Constants';
 
 function App() {
   const [seminars, setSeminars] = useState<Seminar[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isError, setIsError] = useState(false);
   const [refresh, setRefresh] = useState(false);
 
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
+    setIsLoading(true);
 
-      const { data } = await axios.get<Seminar[]>(baseURL);
-      setSeminars(data);
-
-      setLoading(false);
-    };
-
-    fetchData();
+    axios
+      .get<Seminar[]>(baseURL)
+      .then((res) => {
+        setSeminars(res.data);
+      })
+      .catch((e) => {
+        console.log(e);
+        setIsError(true);
+      })
+      .finally(() => setIsLoading(false));
   }, [refresh]);
 
   return (
     <main>
       <div className='main-wrapper'>
-        {loading ? (
-          <h2>Loading...</h2>
-        ) : (
-          seminars.map((item) => <Card seminar={item} refresh={() => setRefresh((prev) => !prev)} key={item.id} />)
-        )}
+        {isError && <h2 className='main-message'>Не удалось загрузить список семинаров</h2>}
+
+        {isLoading && <h2 className='main-message'>Загрузка...</h2>}
+
+        {seminars.length > 0 &&
+          seminars.map((item) => <Card seminar={item} refresh={() => setRefresh((prev) => !prev)} key={item.id} />)}
       </div>
     </main>
   );

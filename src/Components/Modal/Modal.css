@@ -14,7 +14,6 @@
 
   .modal-content {
     min-width: 300px;
-    /* min-height: 150px; */
     background-color: #fff;
     border: 2px solid #000;
     border-radius: 10px;
@@ -67,4 +66,15 @@
   textarea {
     resize: vertical;
   }
+}
+
+.modal-loading {
+  text-align: center;
+  font-weight: bold;
+}
+
+.modal-error {
+  text-align: center;
+  color: red;
+  font-weight: bold;
 }

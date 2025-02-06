@@ -6,5 +6,9 @@ main {
     width: 900px;
     display: flex;
     flex-direction: column;
+
+    .main-message {
+      text-align: center;
+    }
   }
 }

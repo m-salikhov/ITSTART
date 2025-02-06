@@ -6,8 +6,16 @@ interface Props {
   title: string;
   onSubmit: () => void;
   onClose: () => void;
+  isDisabled?: boolean;
 }
-export default function Modal({ active, title, onClose, onSubmit, children }: PropsWithChildren<Props>) {
+export default function Modal({
+  active,
+  title,
+  onClose,
+  onSubmit,
+  children,
+  isDisabled = false,
+}: PropsWithChildren<Props>) {
   if (!active) return null;
 
   return (
@@ -25,10 +33,10 @@ export default function Modal({ active, title, onClose, onSubmit, children }: Pr
         </div>
         <div className='modal-body'>{children}</div>
         <div className='modal-footer'>
-          <button type='button' className='modal-btn' onClick={onSubmit}>
+          <button type='button' className='modal-btn' onClick={onSubmit} disabled={isDisabled}>
             Подтвердить
           </button>
-          <button type='button' className='modal-btn' onClick={onClose}>
+          <button type='button' className='modal-btn' onClick={onClose} disabled={isDisabled}>
             Отменить
           </button>
         </div>
